@@ -2,13 +2,16 @@ package com.irgsoft.zombiebird.helpers;
 
 import com.badlogic.gdx.InputProcessor;
 import com.irgsoft.zombiebird.gameobjects.Bird;
+import com.irgsoft.zombiebird.gameworld.GameWorld;
 
 public class InputHandler implements InputProcessor {
 	
+	private GameWorld gameWorld;
 	private Bird bird;
 	
-	public InputHandler(Bird bird) {
-		this.bird = bird;
+	public InputHandler(GameWorld gameWorld) {
+		this.gameWorld = gameWorld;
+		this.bird = gameWorld.getBird();
 	}
 
 	@Override
@@ -28,7 +31,17 @@ public class InputHandler implements InputProcessor {
 
 	@Override
 	public boolean touchDown(int screenX, int screenY, int pointer, int button) {
+		
+		if (gameWorld.isReady()) {
+			gameWorld.start();
+		}
+		
 		bird.onClick();
+		
+		if (gameWorld.isGameOver()) {
+			gameWorld.restart();
+		}
+		
 		return true;	// Return true to say we handled the touch.
 	}
 
