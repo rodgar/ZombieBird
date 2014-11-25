@@ -3,10 +3,15 @@ package com.irgsoft.zombiebird.gameworld;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.irgsoft.zombiebird.gameobjects.Bird;
+import com.irgsoft.zombiebird.gameobjects.Grass;
+import com.irgsoft.zombiebird.gameobjects.Pipe;
+import com.irgsoft.zombiebird.gameobjects.ScrollHandler;
 import com.irgsoft.zombiebird.helpers.AssetLoader;
 
 public class GameRenderer {
@@ -19,12 +24,24 @@ public class GameRenderer {
 
 	private int midPointY;
 	private int gameHeight;
+	
+	// Game objects
+	private Bird bird;
+	private ScrollHandler scrollHandler;
+	private Grass frontGrass, backGrass;
+	private Pipe pipe1, pipe2, pipe3;
+	
+	// Game assets
+	private TextureRegion bg, grass;
+	private Animation birdAnimation;
+	private TextureRegion birdMid, birdDown, birdUp;
+	private TextureRegion skullUp, skullDown, bar;
 
 	public GameRenderer(GameWorld gameWorld, int gameHeight, int midPointY) {
 		this.gameWorld = gameWorld;
 
-		this.midPointY = midPointY;
 		this.gameHeight = gameHeight;
+		this.midPointY = midPointY;
 
 		camera = new OrthographicCamera();
 		camera.setToOrtho(true, 136, 204);
@@ -35,14 +52,16 @@ public class GameRenderer {
 
 		shapeRenderer = new ShapeRenderer();
 		shapeRenderer.setProjectionMatrix(camera.combined);
+		
+		// Call helper methods to initialize instance variables
+		initGameObjects();
+		initAssets();
 	}
 
 	public void render(float runTime) {
 		Gdx.app.log("GameRenderer", "render");
 
-		Bird bird = gameWorld.getBird();
-
-		// We draw a black background. This precents flickering.
+		// We draw a black background. This prevents flickering.
 		Gdx.gl.glClearColor(0, 0, 0, 1);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
@@ -70,18 +89,85 @@ public class GameRenderer {
 		// This is good for performance when drawing images that do not require
 		// transparency.
 		batcher.disableBlending();
-		batcher.draw(AssetLoader.bg, 0, midPointY + 23, 136, 43);
-
-		// The bird needs transparency
+		batcher.draw(bg, 0, midPointY + 23, 136, 43);
+		
+		// 1. Draw grass
+		drawGrass();
+		
+		// 2. Draw pipes
+		drawPipes();
 		batcher.enableBlending();
+		
+		// 3. Draw skulls (requires transparency)
+		drawSkulls();
+
 		// Draw bird at its coordinates. Retrieve the Animation object from AssetLoader
 		// Pass in the runTime variable to get the current frame.
-		batcher.draw(AssetLoader.birdAnimation.getKeyFrame(runTime),
-				bird.getX(), bird.getY(), bird.getWidth(), bird.getHeight());
+		if(bird.shouldntFlap()) {
+			batcher.draw(birdMid, bird.getX(), bird.getY(), 
+					bird.getWidth() / 2.0f, bird.getHeight() / 2.0f,
+					bird.getWidth(), bird.getHeight(), 1, 1, bird.getRotation());
+		} else {
+			batcher.draw(AssetLoader.birdAnimation.getKeyFrame(runTime),
+					bird.getX(), bird.getY(), bird.getWidth() / 2.0f, bird.getHeight() / 2.0f,
+					bird.getWidth(), bird.getHeight(), 1, 1, bird.getRotation());
+		}
 
 		// End SpriteBatch
 		batcher.end();
 
+	}
+	
+	private void initGameObjects() {
+		bird = gameWorld.getBird();
+		scrollHandler = gameWorld.getScrollHandler();
+		frontGrass = scrollHandler.getFrontGrass();
+		backGrass = scrollHandler.getBackGrass();
+		pipe1 = scrollHandler.getPipe1();
+		pipe2 = scrollHandler.getPipe2();
+		pipe3 = scrollHandler.getPipe3();
+	}
+	
+	private void initAssets() {
+		bg = AssetLoader.bg;
+		grass = AssetLoader.grass;
+		birdAnimation = AssetLoader.birdAnimation;
+		birdMid = AssetLoader.bird;
+		birdDown = AssetLoader.birdDown;
+		birdUp = AssetLoader.birdUp;
+		skullUp = AssetLoader.skullUp;
+		skullDown = AssetLoader.skullDown;
+		bar = AssetLoader.bar;
+	}
+	
+	private void drawGrass() {
+		batcher.draw(grass, frontGrass.getX(), frontGrass.getY(), frontGrass.getWidth(), frontGrass.getHeight());
+		batcher.draw(grass, backGrass.getX(), backGrass.getY(), backGrass.getWidth(), backGrass.getHeight());
+	}
+	
+	private void drawSkulls() {
+		batcher.draw(skullUp, pipe1.getX() - 1, pipe1.getY() + pipe1.getHeight() - 14, 24, 14);
+		batcher.draw(skullDown, pipe1.getX() - 1, pipe1.getY() + pipe1.getHeight() + 45, 24, 14);
+
+		batcher.draw(skullUp, pipe2.getX() - 1, pipe2.getY() + pipe2.getHeight() - 14, 24, 14);
+		batcher.draw(skullDown, pipe2.getX() - 1, pipe2.getY() + pipe2.getHeight() + 45, 24, 14);
+
+		batcher.draw(skullUp, pipe3.getX() - 1, pipe3.getY() + pipe3.getHeight() - 14, 24, 14);
+		batcher.draw(skullDown, pipe3.getX() - 1, pipe3.getY() + pipe3.getHeight() + 45, 24, 14);
+	}
+	
+	private void drawPipes() {
+		batcher.draw(bar, pipe1.getX(), pipe1.getY(), pipe1.getWidth(), pipe1.getHeight());
+		batcher.draw(bar, pipe1.getX(), pipe2.getY() + pipe1.getHeight() + 45,
+				pipe1.getWidth(), midPointY + 66 - (pipe1.getHeight() + 45));
+
+		batcher.draw(bar, pipe2.getX(), pipe2.getY(), pipe2.getWidth(), pipe2.getHeight());
+		batcher.draw(bar, pipe2.getX(), pipe2.getY() + pipe2.getHeight() + 45,
+				pipe2.getWidth(), midPointY + 66 - (pipe2.getHeight() + 45));
+
+		batcher.draw(bar, pipe3.getX(), pipe3.getY(), pipe3.getWidth(), pipe3.getHeight());
+		batcher.draw(bar, pipe3.getX(), pipe3.getY() + pipe3.getHeight() + 45,
+				pipe3.getWidth(), midPointY + 66 - (pipe3.getHeight() + 45));
 	}
 
 }
