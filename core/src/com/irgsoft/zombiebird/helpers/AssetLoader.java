@@ -1,6 +1,7 @@
 package com.irgsoft.zombiebird.helpers;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Preferences;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.Texture.TextureFilter;
@@ -23,6 +24,8 @@ public class AssetLoader {
 	public static Sound coin;
 	
 	public static BitmapFont font, shadow;
+	
+	public static Preferences prefs;
 
 	public static void load() {
 		texture = new Texture(Gdx.files.internal("data/texture.png"));
@@ -63,6 +66,24 @@ public class AssetLoader {
 		font.setScale(.25f, -.25f);
 		shadow = new BitmapFont(Gdx.files.internal("data/shadow.fnt"));
 		shadow.setScale(.25f, -.25f);
+		
+		// Create or retrieve preferences file
+		prefs = Gdx.app.getPreferences("ZombieBird");
+		
+		// Provide default high score
+		if (!prefs.contains("highScore")) {
+			setHighScore(0);
+		}
+			
+	}
+	
+	public static void setHighScore(int highScore) {
+		prefs.putInteger("highScore", highScore);
+		prefs.flush();
+	}
+	
+	public static int getHighScore() {
+		return prefs.getInteger("highScore");
 	}
 	
 	public static void dispose() {

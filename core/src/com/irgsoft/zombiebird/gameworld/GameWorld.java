@@ -1,7 +1,5 @@
 package com.irgsoft.zombiebird.gameworld;
 
-import sun.security.jgss.GSSCaller;
-
 import com.badlogic.gdx.math.Intersector;
 import com.badlogic.gdx.math.Rectangle;
 import com.irgsoft.zombiebird.gameobjects.Bird;
@@ -11,7 +9,7 @@ import com.irgsoft.zombiebird.helpers.AssetLoader;
 public class GameWorld {
 	
 	public enum GameState {
-		READY, RUNNING, GAMEOVER
+		READY, RUNNING, GAMEOVER, HIGHSCORE
 	}
 
 	private Bird bird;
@@ -54,6 +52,11 @@ public class GameWorld {
 			bird.die();
 			bird.decelerate();
 			currentState = GameState.GAMEOVER;
+			
+			if (score > AssetLoader.getHighScore()) {
+				AssetLoader.setHighScore(score);
+				currentState = GameState.HIGHSCORE;
+			}
 		}
 	}
 	
@@ -63,8 +66,9 @@ public class GameWorld {
 			updateReady(delta);
 			break;
 		case RUNNING:
-		default:
 			updateRunning(delta);
+			break;
+		default:
 			break;
 		}
 	}
@@ -106,5 +110,9 @@ public class GameWorld {
 
 	public boolean isGameOver() {
 		return currentState == GameState.GAMEOVER;
+	}
+	
+	public boolean isHighScore() {
+		return currentState == GameState.HIGHSCORE;
 	}
 }
