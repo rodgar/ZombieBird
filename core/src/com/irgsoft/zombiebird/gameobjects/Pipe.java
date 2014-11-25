@@ -14,6 +14,7 @@ public class Pipe extends Scrollable {
 	private Random r;
 	private Rectangle skullUp, skullDown, barUp, barDown;
 	private float groundY;
+	private boolean isScored = false;
 
 	public Pipe(float x, float y, int width, int height, float scrollSpeed,
 			float groundY) {
@@ -54,9 +55,12 @@ public class Pipe extends Scrollable {
 
 		// Change the height to a random number
 		height = r.nextInt(90) + 15;
+		
+		isScored = false;
 	}
 	
 	public boolean collides(Bird bird) {
+
 		if (position.x < bird.getX() + bird.getWidth()) {
 			return (Intersector.overlaps(bird.getBoundingCircle(), barUp)
 					|| Intersector.overlaps(bird.getBoundingCircle(), barDown)
@@ -80,5 +84,13 @@ public class Pipe extends Scrollable {
 
 	public Rectangle getBarDown() {
 		return barDown;
+	}
+
+	public boolean isScored() {
+		return isScored;
+	}
+	
+	public void setScored(boolean isScored) {
+		this.isScored = isScored;
 	}
 }

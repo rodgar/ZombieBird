@@ -1,5 +1,8 @@
 package com.irgsoft.zombiebird.gameobjects;
 
+import com.irgsoft.zombiebird.gameworld.GameWorld;
+import com.irgsoft.zombiebird.helpers.AssetLoader;
+
 public class ScrollHandler {
 	
 	// ScrollHandler will create all five objects that we need.
@@ -12,10 +15,14 @@ public class ScrollHandler {
 	
 	public static final int SCROLL_SPEED = -59;
 	public static final int PIPE_GAP = 49;
+	
+	private GameWorld gameWorld;
 
 	// Constructor receives a float that tells us where we need to create our
     // Grass and Pipe objects.
-	public ScrollHandler(float yPos) {
+	public ScrollHandler(GameWorld gameWorld, float yPos) {
+		this.gameWorld = gameWorld;
+		
 		frontGrass = new Grass(0, yPos, 143, 11, SCROLL_SPEED);
 		backGrass = new Grass(frontGrass.getTailX(), yPos, 143, 11, SCROLL_SPEED);
 		
@@ -62,7 +69,28 @@ public class ScrollHandler {
 	 * @return true if any pipe collides with the bird
 	 */
 	public boolean collides(Bird bird) {
+		if (!pipe1.isScored() 
+				&& pipe1.getX() + (pipe1.getWidth() / 2) < bird.getX() + bird.getWidth()) {
+			addScore(1);
+			pipe1.setScored(true);
+			AssetLoader.coin.play();
+		} else if (!pipe2.isScored() 
+				&& pipe2.getX() + (pipe2.getWidth() / 2) < bird.getX() + bird.getWidth()) {
+			addScore(1);
+			pipe2.setScored(true);
+			AssetLoader.coin.play();
+		} else if (!pipe3.isScored() 
+				&& pipe3.getX() + (pipe3.getWidth() / 2) < bird.getX() + bird.getWidth()) {
+			addScore(1);
+			pipe3.setScored(true);
+			AssetLoader.coin.play();
+		}
+		
 		return (pipe1.collides(bird) || pipe2.collides(bird) || pipe3.collides(bird));
+	}
+	
+	public void addScore(int increment) {
+		gameWorld.addScore(increment);
 	}
 	
 	public Grass getFrontGrass() {

@@ -11,11 +11,12 @@ public class GameWorld {
 	private Bird bird;
 	private ScrollHandler scrollHandler;
 	private Rectangle ground;
+	private int score = 0;
 	
 	public GameWorld(int midPointY) {
 		bird = new Bird(33, midPointY - 5, 17, 12);
 		// The grass should start 66 points below the midPointY
-		scrollHandler = new ScrollHandler(midPointY + 66);
+		scrollHandler = new ScrollHandler(this, midPointY + 66);
 		
 		ground = new Rectangle(0, midPointY + 66, 136, 11);
 	}
@@ -51,5 +52,13 @@ public class GameWorld {
 	
 	public ScrollHandler getScrollHandler() {
 		return scrollHandler;
+	}
+	
+	public int getScore() {
+		return score;
+	}
+	
+	public void addScore(int increment) {
+		score += increment;
 	}
 }

@@ -113,6 +113,13 @@ public class GameRenderer {
 					bird.getX(), bird.getY(), bird.getWidth() / 2.0f, bird.getHeight() / 2.0f,
 					bird.getWidth(), bird.getHeight(), 1, 1, bird.getRotation());
 		}
+		
+		String score = String.valueOf(gameWorld.getScore());
+		
+		// Draw shadow first
+		AssetLoader.shadow.draw(batcher, score, (136 / 2) - (3 * score.length()), 12);
+		// Draw text
+		AssetLoader.font.draw(batcher, score, (136 / 2) - (3 * score.length() -1), 12);
 
 		// End SpriteBatch
 		batcher.end();
