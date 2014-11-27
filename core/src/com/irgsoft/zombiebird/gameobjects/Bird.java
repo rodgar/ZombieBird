@@ -36,10 +36,10 @@ public class Bird {
 		}
 		
 		// Ceiling check
-//		if (position.y > -13) {
-//			position.y = -13;
-//			velocity.y = 0;
-//		}
+		if (position.y < 0) {
+			position.y = 0;
+			velocity.y = 0;
+		}
 
 		position.add(velocity.cpy().scl(delta));
 
